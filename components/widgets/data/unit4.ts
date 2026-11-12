@@ -1,0 +1,57 @@
+export const ACTIVATION_STEPS = [
+  { step: 1, stack: ['main()'], tree: 'main', say: 'Call main(): allocate activation record on stack with local variable r.' },
+  { step: 2, stack: ['main()', 'fact(3)'], tree: 'main → fact(3)', say: 'main calls fact(3): push activation record with parameter n=3.' },
+  { step: 3, stack: ['main()', 'fact(3)', 'fact(2)'], tree: 'main → fact(3) → fact(2)', say: 'Recursive call fact(2): push new activation record with n=2.' },
+  { step: 4, stack: ['main()', 'fact(3)', 'fact(2)', 'fact(1)'], tree: 'main → fact(3) → fact(2) → fact(1)', say: 'Base case fact(1): n <= 1, returns 1.' },
+  { step: 5, stack: ['main()', 'fact(3)', 'fact(2)'], tree: 'fact(1) popped, returns 1', say: 'Pop fact(1): return value 1 passed to fact(2). fact(2) computes 2 * 1 = 2.' },
+  { step: 6, stack: ['main()', 'fact(3)'], tree: 'fact(2) popped, returns 2', say: 'Pop fact(2): return value 2 passed to fact(3). fact(3) computes 3 * 2 = 6.' },
+  { step: 7, stack: ['main() [r = 6]'], tree: 'fact(3) popped, returns 6', say: 'Pop fact(3): return value 6 assigned to local r in main(). Stack clears.' },
+];
+
+export const CODEGEN_STEPS = [
+  {
+    step: 1,
+    tac: 't = a − b',
+    code: 'MOV a, R0 ; SUB b, R0',
+    rDesc: 'R0 holds t',
+    aDesc: 't in R0',
+    cost: '2 + 2 = 4',
+    say: "Load 'a' into R0 and subtract 'b'. Cost: 2 words for MOV, 2 words for SUB.",
+  },
+  {
+    step: 2,
+    tac: 'u = a − c',
+    code: 'MOV a, R1 ; SUB c, R1',
+    rDesc: 'R0: t, R1: u',
+    aDesc: 't in R0, u in R1',
+    cost: '2 + 2 = 4',
+    say: "Load 'a' into R1 and subtract 'c'. Both registers now in use.",
+  },
+  {
+    step: 3,
+    tac: 'v = t + u',
+    code: 'ADD R1, R0',
+    rDesc: 'R0: v, R1: u',
+    aDesc: 'v in R0, u in R1',
+    cost: '1',
+    say: "Register-to-register ADD: R0 gets v = t + u. Register operands cost 0 extra memory words.",
+  },
+  {
+    step: 4,
+    tac: 'd = v + u',
+    code: 'ADD R1, R0',
+    rDesc: 'R0: d',
+    aDesc: 'd in R0',
+    cost: '1',
+    say: 'Reuse u in R1: ADD R1, R0 computes d into R0.',
+  },
+  {
+    step: 5,
+    tac: '(end of block, store d)',
+    code: 'MOV R0, d',
+    rDesc: 'R0: d',
+    aDesc: 'd in R0 and memory',
+    cost: '2',
+    say: "At the end of the basic block, live variable 'd' is written back to memory. Total cost: 12.",
+  },
+];

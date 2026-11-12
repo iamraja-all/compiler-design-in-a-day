@@ -1,18 +1,26 @@
 'use client';
 
-import React from 'react';
+import React, { useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { Callout, CheckCallout, CalloutType } from './Callout';
 import { CodeBlock } from './CodeBlock';
 import { DataTable, TableHead, TableRow, TableCell } from './DataTable';
 import { WIDGET_REGISTRY, WidgetPlaceholder } from '@/components/widgets';
+import { DIAGRAM_OVERRIDES } from '@/lib/diagram-overrides';
+import { DiagramWrapper } from '@/components/diagrams/DiagramWrapper';
 
 interface MarkdownRendererProps {
   content: string;
+  fileSlug?: string;
+  startTextIndex?: number;
 }
 
-export function MarkdownRenderer({ content }: MarkdownRendererProps) {
+export function MarkdownRenderer({
+  content,
+  fileSlug,
+  startTextIndex = 1,
+}: MarkdownRendererProps) {
   // Split content by {{widget:ID}} lines so widgets are top-level block elements
   const parts: { type: 'markdown' | 'widget'; value: string }[] = [];
   const lines = content.split(/\r?\n/);
@@ -35,6 +43,11 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
     parts.push({ type: 'markdown', value: currentMd.join('\n') });
   }
 
+  // Ref to track text block counting sequentially across chunks within this section
+  const textCounterRef = useRef<number>(startTextIndex);
+  // Reset counter when startTextIndex changes
+  textCounterRef.current = startTextIndex;
+
   return (
     <div className="markdown-body space-y-6 text-[var(--text)]">
       {parts.map((part, index) => {
@@ -49,13 +62,28 @@ export function MarkdownRenderer({ content }: MarkdownRendererProps) {
           );
         }
 
-        return <MarkdownChunk key={`md-${index}`} markdown={part.value} />;
+        return (
+          <MarkdownChunk
+            key={`md-${index}`}
+            markdown={part.value}
+            fileSlug={fileSlug}
+            textCounterRef={textCounterRef}
+          />
+        );
       })}
     </div>
   );
 }
 
-function MarkdownChunk({ markdown }: { markdown: string }) {
+function MarkdownChunk({
+  markdown,
+  fileSlug,
+  textCounterRef,
+}: {
+  markdown: string;
+  fileSlug?: string;
+  textCounterRef: React.MutableRefObject<number>;
+}) {
   return (
     <ReactMarkdown
       remarkPlugins={[remarkGfm]}
@@ -201,7 +229,6 @@ function MarkdownChunk({ markdown }: { markdown: string }) {
         tr: ({ children }) => <TableRow>{children}</TableRow>,
         th: ({ children }) => <TableCell isHeader>{children}</TableCell>,
         td: ({ children }) => {
-          // Replace escaped pipe \| with |
           return <TableCell>{children}</TableCell>;
         },
 
@@ -221,12 +248,25 @@ function MarkdownChunk({ markdown }: { markdown: string }) {
             );
           }
 
-          return (
-            <CodeBlock
-              language={match ? match[1] : ''}
-              value={String(children).replace(/\n$/, '')}
-            />
-          );
+          const lang = match ? match[1] : '';
+          const value = String(children).replace(/\n$/, '');
+
+          // Check for diagram replacement on text code blocks
+          if (lang === 'text') {
+            const currentN = textCounterRef.current++;
+            const blockId = fileSlug ? `${fileSlug}#${currentN}` : undefined;
+
+            if (blockId && DIAGRAM_OVERRIDES[blockId]) {
+              const DiagramComponent = DIAGRAM_OVERRIDES[blockId];
+              return (
+                <DiagramWrapper blockId={blockId} originalText={value}>
+                  {DiagramComponent(value)}
+                </DiagramWrapper>
+              );
+            }
+          }
+
+          return <CodeBlock language={lang} value={value} />;
         },
 
         // Horizontal rule

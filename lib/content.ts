@@ -11,6 +11,7 @@ export interface Section {
   wordCount: number;
   widgetCount: number;
   estimatedMinutes: number;
+  textBlockOffset: number;
 }
 
 export interface CheckQuestionItem {
@@ -126,6 +127,23 @@ export function getUnitData(slug: string): UnitData | null {
   const sections: Section[] = [];
   let currentTitle = '';
   let currentLines: string[] = [];
+  let runningTextBlockCount = 0;
+
+  const countTextBlocks = (linesArr: string[]) => {
+    let count = 0;
+    let inCode = false;
+    let lang = '';
+    for (const l of linesArr) {
+      if (!inCode && l.startsWith('```')) {
+        inCode = true;
+        lang = l.slice(3).trim();
+      } else if (inCode && l.startsWith('```')) {
+        inCode = false;
+        if (lang === 'text') count++;
+      }
+    }
+    return count;
+  };
 
   const flushSection = () => {
     if (currentTitle || currentLines.length > 0) {
@@ -134,6 +152,9 @@ export function getUnitData(slug: string): UnitData | null {
       const widgetMatches = sectionText.match(/\{\{widget:[^}]+\}\}/g) || [];
       const widgetCount = widgetMatches.length;
       const estimatedMinutes = Math.max(1, Math.ceil(words / 200 + widgetCount * 2));
+      const textBlockOffset = runningTextBlockCount + 1;
+      const blockCount = countTextBlocks(currentLines);
+      runningTextBlockCount += blockCount;
 
       sections.push({
         id: slugify(currentTitle || 'intro'),
@@ -142,6 +163,7 @@ export function getUnitData(slug: string): UnitData | null {
         wordCount: words,
         widgetCount,
         estimatedMinutes,
+        textBlockOffset,
       });
     }
   };

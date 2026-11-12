@@ -1,0 +1,499 @@
+{
+  "00-introduction#1": {
+    "file": "00-introduction.md",
+    "slug": "00-introduction",
+    "n": 1,
+    "startLine": 40,
+    "raw": " source program (with #include, #define)\n        │\n   [ Preprocessor ]   expands macros, pastes header files\n        │\n   [ Compiler ]       → assembly program\n        │\n   [ Assembler ]      → relocatable machine code (.o)\n        │\n   [ Linker / Loader ] joins library files (.o, .a) and loads into memory\n        │\n   target machine code (runs!)"
+  },
+  "00-introduction#2": {
+    "file": "00-introduction.md",
+    "slug": "00-introduction",
+    "n": 2,
+    "startLine": 59,
+    "raw": "                    source program\n                          │\n          ┌───────────────▼───────────────┐\n          │ 1. Lexical Analyzer  (Unit I)  │──┐\n          ├───────────────────────────────┤  │\n          │ 2. Syntax Analyzer   (Unit II) │  │\n          ├───────────────────────────────┤  │\n          │ 3. Semantic Analyzer (Unit III)│  │     ┌───────────────┐\n          ├───────────────────────────────┤  ├────►│ SYMBOL TABLE  │\n          │ 4. Intermediate Code (Unit III)│  │     │ (shared notes)│\n          │    Generator                   │  │     └───────────────┘\n          ├───────────────────────────────┤  │     ┌───────────────┐\n          │ 5. Code Optimizer    (Unit V)  │  ├────►│ ERROR HANDLER │\n          ├───────────────────────────────┤  │     └───────────────┘\n          │ 6. Code Generator    (Unit IV) │──┘\n          └───────────────┬───────────────┘\n                          ▼\n                    target program"
+  },
+  "00-introduction#3": {
+    "file": "00-introduction.md",
+    "slug": "00-introduction",
+    "n": 3,
+    "startLine": 96,
+    "raw": " Characters:  x   =   a   +   b   *   2\n Tokens:     id  =   id  +   id  *  num\n             (x)     (a)     (b)    (2)"
+  },
+  "00-introduction#4": {
+    "file": "00-introduction.md",
+    "slug": "00-introduction",
+    "n": 4,
+    "startLine": 105,
+    "raw": "            =\n          /   \\\n         x     +\n             /   \\\n            a     *\n                /   \\\n               b     2"
+  },
+  "00-introduction#5": {
+    "file": "00-introduction.md",
+    "slug": "00-introduction",
+    "n": 5,
+    "startLine": 119,
+    "raw": "t1 = b * 2\nt2 = a + t1\nx  = t2"
+  },
+  "00-introduction#6": {
+    "file": "00-introduction.md",
+    "slug": "00-introduction",
+    "n": 6,
+    "startLine": 127,
+    "raw": "MOV b, R0     ; put b in register R0\nMUL #2, R0    ; R0 = R0 * 2\nADD a, R0     ; R0 = R0 + a\nMOV R0, x     ; store result in x"
+  },
+  "00-introduction#7": {
+    "file": "00-introduction.md",
+    "slug": "00-introduction",
+    "n": 7,
+    "startLine": 136,
+    "raw": " BEFORE                 AFTER\n t1 = b * 2     ──►     t1 = b + b     (adding is cheaper than multiplying)\n t2 = a + t1            x  = a + t1    (t2 was not needed)\n x  = t2"
+  },
+  "00-introduction#8": {
+    "file": "00-introduction.md",
+    "slug": "00-introduction",
+    "n": 8,
+    "startLine": 178,
+    "raw": " Hour 1–2   UNIT I    RE → NFA → DFA → Minimize        (one machine, three steps)\n Hour 3–5   UNIT II   FIRST/FOLLOW → LL(1) → SLR → LALR (most marks live here)\n Hour 6     UNIT III  Annotated tree, 3-address code formats, backpatching\n Hour 7     UNIT IV   Activation records, basic blocks, code generator\n Hour 8     UNIT V    DAG + optimization techniques + data flow\n Hour 9–10  REVISION  One problem per ⭐⭐⭐ row + flashcards"
+  },
+  "01-unit-1#1": {
+    "file": "01-unit-1.md",
+    "slug": "01-unit-1",
+    "n": 1,
+    "startLine": 18,
+    "raw": "                   \"get next token\"\n   ┌──────────┐ ◄──────────────────── ┌──────────┐\n   │  Lexical │                       │  Parser  │ ──► rest of compiler\n   │ Analyzer │ ────────────────────► │          │\n   └────┬─────┘     token             └────┬─────┘\n        │ reads characters                 │\n   source program        ┌──────────────┐  │\n        └───────────────►│ Symbol Table │◄─┘\n                         └──────────────┘"
+  },
+  "01-unit-1#2": {
+    "file": "01-unit-1.md",
+    "slug": "01-unit-1",
+    "n": 2,
+    "startLine": 75,
+    "raw": " ┌───┬───┬───┬───┬───┬───┬───┬────┐┌───┬───┬───┬───┬───┬────┬───┬────┐\n │ E │   │ = │   │ M │   │ * │eof ││ C │ * │ * │ 2 │eof │    │   │eof │\n └───┴───┴───┴───┴───┴───┴───┴────┘└───┴───┴───┴───┴────┴────┴───┴────┘\n           ▲          ▲\n   lexemeBegin      forward"
+  },
+  "01-unit-1#3": {
+    "file": "01-unit-1.md",
+    "slug": "01-unit-1",
+    "n": 3,
+    "startLine": 114,
+    "raw": "letter  →  A | B | … | Z | a | b | … | z | _\ndigit   →  0 | 1 | … | 9\nid      →  letter ( letter | digit )*\ndigits  →  digit+\nnumber  →  digits ( . digits )? ( E [+-]? digits )?"
+  },
+  "01-unit-1#4": {
+    "file": "01-unit-1.md",
+    "slug": "01-unit-1",
+    "n": 4,
+    "startLine": 130,
+    "raw": " Relational operators:\n                   =\n          ┌──► (1) ──────► ((2))  return(relop, LE)\n          │ <    │  >\n   ──►(0)─┤      ├──────► ((3))  return(relop, NE)\n          │      │ other\n          │      └──────► ((4))* return(relop, LT)   * = retract one char\n          │ =\n          ├──────────────► ((5))  return(relop, EQ)\n          │ >            =\n          └──► (6) ──────► ((7))  return(relop, GE)\n                 │ other\n                 └──────► ((8))* return(relop, GT)"
+  },
+  "01-unit-1#5": {
+    "file": "01-unit-1.md",
+    "slug": "01-unit-1",
+    "n": 5,
+    "startLine": 147,
+    "raw": " Identifier:      letter or digit\n                     ┌──┐\n          letter     ▼  │      other\n   ──►(9) ──────► (10) ─┴───────────► ((11))*  return(getToken(), installID())"
+  },
+  "01-unit-1#6": {
+    "file": "01-unit-1.md",
+    "slug": "01-unit-1",
+    "n": 6,
+    "startLine": 180,
+    "raw": " ε:      (i) ──ε──► ((f))\n\n a:      (i) ──a──► ((f))\n\n s|t:         ┌─ε─► [ N(s) ] ─ε─┐\n         (i) ─┤                 ├─► ((f))\n              └─ε─► [ N(t) ] ─ε─┘\n\n st:     (i) ─► [ N(s) ] ──► [ N(t) ] ─► ((f))      (end of s = start of t)\n\n s*:              ┌──────ε──────┐  (loop back)\n                  ▼             │\n         (i) ─ε─► [   N(s)    ] ─ε─► ((f))\n          │                           ▲\n          └─────────────ε─────────────┘  (skip entirely: zero times)"
+  },
+  "01-unit-1#7": {
+    "file": "01-unit-1.md",
+    "slug": "01-unit-1",
+    "n": 7,
+    "startLine": 210,
+    "raw": "              ┌────────────────ε──────────────────┐\n              │        a                          │\n              ▼    ┌─►(2)──►(3)─┐                 │\n   ──►(0)─ε─►(1)─ε─┤            ├─ε─►(6)──────────┘\n       │           └─►(4)──►(5)─┘     │\n       │               b              ε\n       │                              ▼    a      b      b\n       └──────────────ε─────────────►(7)──►(8)──►(9)──►((10))"
+  },
+  "01-unit-1#8": {
+    "file": "01-unit-1.md",
+    "slug": "01-unit-1",
+    "n": 8,
+    "startLine": 268,
+    "raw": " Π0 = {A B C D} {E}\n Π1 = {A B C} {D} {E}        (D on b → E, others don't)\n Π2 = {A C} {B} {D} {E}      (B on b → D, A and C don't)\n Final: {A,C} cannot split → 4 states\n\n Main path:   ──► (0) ──a──► (1) ──b──► (2) ──b──► ((3))"
+  },
+  "01-unit-1#9": {
+    "file": "01-unit-1.md",
+    "slug": "01-unit-1",
+    "n": 9,
+    "startLine": 293,
+    "raw": "  lex.l ──► [ Lex compiler ] ──► lex.yy.c ──► [ C compiler ] ──► a.out\n                                                     input stream ──► a.out ──► tokens"
+  },
+  "01-unit-1#10": {
+    "file": "01-unit-1.md",
+    "slug": "01-unit-1",
+    "n": 10,
+    "startLine": 335,
+    "raw": " RE ──Thompson──► NFA ──subset construction──► DFA ──partitioning──► min DFA\n   (describe)        (easy to build)              (fast to run)        (smallest)"
+  },
+  "02-unit-2#1": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 1,
+    "startLine": 12,
+    "raw": " source ──► [ Lexer ] ──token──► [ Parser ] ──parse tree──► [ rest of front end ] ──► IR\n                ▲   ◄─get next token─┘   │\n                └──────── Symbol Table ──┘"
+  },
+  "02-unit-2#2": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 2,
+    "startLine": 34,
+    "raw": " E → E + T | T\n T → T * F | F\n F → ( E ) | id"
+  },
+  "02-unit-2#3": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 3,
+    "startLine": 45,
+    "raw": "E ⇒ E + T ⇒ T + T ⇒ F + T ⇒ id + T ⇒ id + T * F ⇒ id + F * F ⇒ id + id * F ⇒ id + id * id"
+  },
+  "02-unit-2#4": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 4,
+    "startLine": 50,
+    "raw": " Parse tree for id + id * id:\n              E\n           /  |  \\\n          E   +   T\n          |     / | \\\n          T    T  *  F\n          |    |     |\n          F    F     id\n          |    |\n          id   id"
+  },
+  "02-unit-2#5": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 5,
+    "startLine": 69,
+    "raw": " Grammar: E → E + E | E * E | id      String: id + id * id\n\n     Tree 1 (correct)             Tree 2 (wrong)\n          E                            E\n        / | \\                        / | \\\n       E  +  E                      E  *  E\n       |   / | \\                  / | \\   |\n      id  E  *  E                E  +  E  id\n          |     |                |     |\n          id    id               id    id\n     2 + (3*4) = 14             (2+3) * 4 = 20"
+  },
+  "02-unit-2#6": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 6,
+    "startLine": 108,
+    "raw": " E → E + T | T         ⇒   E  → T E'\n                           E' → + T E' | ε\n T → T * F | F         ⇒   T  → F T'\n                           T' → * F T' | ε"
+  },
+  "02-unit-2#7": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 7,
+    "startLine": 123,
+    "raw": " S → i E t S | i E t S e S | a     ⇒     S  → i E t S S' | a\n                                         S' → e S | ε"
+  },
+  "02-unit-2#8": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 8,
+    "startLine": 138,
+    "raw": " Top-down:  E  ─► grow tree ─► … ─► id + id * id        (root first)\n Bottom-up: id + id * id ─► shrink ─► … ─► E            (leaves first)"
+  },
+  "02-unit-2#9": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 9,
+    "startLine": 221,
+    "raw": " ┌─────────────────────────┐\n │ input:  id + id * id $  │\n └─────────────────────────┘\n stack (start: E $)  +  table  ──►  output: productions used"
+  },
+  "02-unit-2#10": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 10,
+    "startLine": 269,
+    "raw": " id * id  ⇒(reduce F→id)  F * id  ⇒  T * id  ⇒  T * F  ⇒  T  ⇒  E"
+  },
+  "02-unit-2#11": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 11,
+    "startLine": 295,
+    "raw": "                   ┌──────────────────────────────┐\n  input: a1 … an $ │                              │\n                   │  LR parsing program          │──► output\n  stack: s0 X1 s1… │  ACTION[state, terminal]     │\n                   │  GOTO[state, non-terminal]   │\n                   └──────────────────────────────┘"
+  },
+  "02-unit-2#12": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 12,
+    "startLine": 317,
+    "raw": " E → • E + T     seen nothing yet\n E → E • + T     seen E, expecting +\n E → E + • T     seen E +, expecting T\n E → E + T •     seen everything → ready to REDUCE"
+  },
+  "02-unit-2#13": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 13,
+    "startLine": 340,
+    "raw": " I0: E'→•E  E→•E+T  E→•T  T→•T*F  T→•F  F→•(E)  F→•id\n I1: E'→E•  E→E•+T                         (from I0 on E)\n I2: E→T•   T→T•*F                         (from I0 on T)\n I3: T→F•                                  (from I0 on F)\n I4: F→(•E) E→•E+T E→•T T→•T*F T→•F F→•(E) F→•id   (from I0 on ( )\n I5: F→id•                                 (from I0 on id)\n I6: E→E+•T T→•T*F T→•F F→•(E) F→•id      (from I1 on +)\n I7: T→T*•F F→•(E) F→•id                  (from I2 on *)\n I8: F→(E•) E→E•+T                         (from I4 on E)\n I9: E→E+T• T→T•*F                         (from I6 on T)\n I10: T→T*F•                               (from I7 on F)\n I11: F→(E)•                               (from I8 on ) )"
+  },
+  "02-unit-2#14": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 14,
+    "startLine": 434,
+    "raw": " I0: S'→•S,$  S→•CC,$  C→•cC,c/d  C→•d,c/d\n I1: S'→S•,$\n I2: S→C•C,$  C→•cC,$  C→•d,$\n I3: C→c•C,c/d  C→•cC,c/d  C→•d,c/d       ┐ same core\n I6: C→c•C,$    C→•cC,$    C→•d,$          ┘ → merge 36\n I4: C→d•,c/d                              ┐ same core\n I7: C→d•,$                                ┘ → merge 47\n I8: C→cC•,c/d                             ┐ same core\n I9: C→cC•,$                               ┘ → merge 89\n I5: S→CC•,$"
+  },
+  "02-unit-2#15": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 15,
+    "startLine": 478,
+    "raw": " parser.y ──► [ yacc ] ──► y.tab.c ──► [ cc ] ──► a.out\n lex.l    ──► [ lex  ] ──► lex.yy.c ──┘      (yylex() supplies tokens to yyparse())"
+  },
+  "02-unit-2#16": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 16,
+    "startLine": 533,
+    "raw": " program → stmt_list\n stmt_list → stmt_list stmt | stmt\n stmt → id = expr ;\n      | if ( cond ) stmt else stmt\n      | while ( cond ) stmt\n      | { stmt_list }\n cond → expr relop expr\n expr → expr + term | expr - term | term\n term → term * factor | term / factor | factor\n factor → ( expr ) | id | num"
+  },
+  "02-unit-2#17": {
+    "file": "02-unit-2.md",
+    "slug": "02-unit-2",
+    "n": 17,
+    "startLine": 548,
+    "raw": " Grammar ─┬─► top-down (LL):  remove left recursion + left factor → FIRST/FOLLOW → LL(1) table → trace\n          └─► bottom-up (LR): augment → items (closure/goto) → SLR / CLR / LALR table → shift-reduce trace"
+  },
+  "03-unit-3#1": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 1,
+    "startLine": 37,
+    "raw": "                    L  (prints 19)\n                  /   \\\n         E.val=19       n\n        /    |    \\\n  E.val=15   +    T.val=4\n     |              |\n  T.val=15        F.val=4\n  /   |   \\         |\nT.val=3 *  F.val=5  digit.lexval=4\n  |          |\nF.val=3    digit.lexval=5\n  |\ndigit.lexval=3"
+  },
+  "03-unit-3#2": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 2,
+    "startLine": 82,
+    "raw": "            D\n          /   \\\n  T.type=float  L.inh=float  ──► addType(id3, float)\n     |         /   |   \\\n   float  L.inh=float ,  id3\n          /   |   \\\n  L.inh=float  ,  id2   ──► addType(id2, float)\n       |\n      id1                ──► addType(id1, float)"
+  },
+  "03-unit-3#3": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 3,
+    "startLine": 107,
+    "raw": " Parse tree of a - 4 + c                 Syntax tree of a - 4 + c\n          E                                       +\n       /  |  \\                                  /   \\\n      E   +   T                                -     c\n    / | \\     |                              /   \\\n   E  -  T    F                             a     4\n   |     |    |\n   T     F    c\n   |     |\n   F    num\n   |\n   a"
+  },
+  "03-unit-3#4": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 4,
+    "startLine": 139,
+    "raw": " E → E1 + T   { val[top-2] = val[top-2] + val[top] ; pop 2 }\n\n   state stack  …  E    +    T        value stack  …  15   _   4\n                   ▲top-2    ▲top                          ⇒ 19"
+  },
+  "03-unit-3#5": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 5,
+    "startLine": 210,
+    "raw": " type link = ↑cell;\n var next : link;\n     last : link;\n     p    : ↑cell;\n     q, r : ↑cell;"
+  },
+  "03-unit-3#6": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 6,
+    "startLine": 225,
+    "raw": " Widening hierarchy:   double\n                         │\n                       float\n                         │\n                       long\n                         │\n                        int\n                       /   \\\n                   short   char"
+  },
+  "03-unit-3#7": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 7,
+    "startLine": 237,
+    "raw": "t1 = (float) i\nt2 = t1 + f\nx  = t2"
+  },
+  "03-unit-3#8": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 8,
+    "startLine": 251,
+    "raw": "  C ─┐                     ┌─► x86\n C++ ─┼─► [ IR ] ─optimize─┼─► ARM\n Java─┘                     └─► RISC-V"
+  },
+  "03-unit-3#9": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 9,
+    "startLine": 268,
+    "raw": " a + a * (b - c) + (b - c) * d\n\n Syntax tree (things repeated):          DAG (shared nodes, numbered):\n              +                            n1 = a\n            /   \\                          n2 = b\n           +     *                         n3 = c\n          / \\   / \\                        n4 = n2 - n3        (b - c)   ← used twice\n         a   * -   d                       n5 = n1 * n4        a * (b-c)\n            / \\ / \\                        n6 = n1 + n5        a + …     ← a used twice\n           a  - b  c                       n7 = d\n             / \\                           n8 = n4 * n7        (b-c) * d\n            b   c                          n9 = n6 + n8        root"
+  },
+  "03-unit-3#10": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 10,
+    "startLine": 303,
+    "raw": " t1 = minus c\n t2 = b * t1\n t3 = minus c\n t4 = b * t3\n t5 = t2 + t4\n a  = t5"
+  },
+  "03-unit-3#11": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 11,
+    "startLine": 401,
+    "raw": "x = a[i][j]   ⇒   t1 = i * 12\n                  t2 = j * 4\n                  t3 = t1 + t2\n                  t4 = a[t3]\n                  x  = t4"
+  },
+  "03-unit-3#12": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 12,
+    "startLine": 411,
+    "raw": " while (a < b) {                 L1: if a < b goto L2\n     if (c < d) x = y + z;           goto Lnext\n     else       x = y - z;       L2: if c < d goto L3\n }                                   goto L4\n                                 L3: t1 = y + z\n                                     x = t1\n                                     goto L1\n                                 L4: t2 = y - z\n                                     x = t2\n                                     goto L1\n                                 Lnext:"
+  },
+  "03-unit-3#13": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 13,
+    "startLine": 458,
+    "raw": " Step 1  a<b   → 100: if a<b goto _   101: goto _      t={100}  f={101}\n Step 2  M1.instr = 102\n Step 3  c<d   → 102: if c<d goto _   103: goto _      t={102}  f={103}\n Step 4  M2.instr = 104\n Step 5  e<f   → 104: if e<f goto _   105: goto _      t={104}  f={105}\n Step 6  &&  (binds tighter): backpatch({102}, 104)\n               t={104}   f={103,105}\n Step 7  ||  : backpatch({101}, 102)\n               t={100,104}   f={103,105}\n\n Final:\n 100: if a < b goto _       ← true exit\n 101: goto 102\n 102: if c < d goto 104\n 103: goto _                ← false exit\n 104: if e < f goto _       ← true exit\n 105: goto _                ← false exit"
+  },
+  "03-unit-3#14": {
+    "file": "03-unit-3.md",
+    "slug": "03-unit-3",
+    "n": 14,
+    "startLine": 488,
+    "raw": " parse tree ──(attributes + rules = SDD)──► annotated tree / syntax tree / types checked\n            ──(gen TAC)──► quadruples · triples · indirect triples ──(backpatch jumps)──► IR ready"
+  },
+  "04-unit-4#1": {
+    "file": "04-unit-4.md",
+    "slug": "04-unit-4",
+    "n": 1,
+    "startLine": 28,
+    "raw": "     environment          state\n name ──────────► location ──────► value\n  x                 0x1000          42"
+  },
+  "04-unit-4#2": {
+    "file": "04-unit-4.md",
+    "slug": "04-unit-4",
+    "n": 2,
+    "startLine": 36,
+    "raw": " low address  ┌─────────────────────┐\n              │        Code         │  fixed size, known at compile time\n              ├─────────────────────┤\n              │   Static / Global   │  fixed size, known at compile time\n              ├─────────────────────┤\n              │        Heap         │  grows downward ↓  (malloc / new)\n              │          ↓          │\n              │                     │\n              │     free memory     │\n              │                     │\n              │          ↑          │\n              │        Stack        │  grows upward ↑  (function calls)\n high address └─────────────────────┘"
+  },
+  "04-unit-4#3": {
+    "file": "04-unit-4.md",
+    "slug": "04-unit-4",
+    "n": 3,
+    "startLine": 57,
+    "raw": " ┌──────────────────────────────┐\n │ Actual parameters            │  values passed by the caller\n ├──────────────────────────────┤\n │ Returned value               │  space for the result\n ├──────────────────────────────┤\n │ Control link (dynamic link)  │  → caller's activation record\n ├──────────────────────────────┤\n │ Access link (static link)    │  → record of the enclosing scope (non-local data)\n ├──────────────────────────────┤\n │ Saved machine status         │  return address, saved registers\n ├──────────────────────────────┤\n │ Local data                   │  local variables\n ├──────────────────────────────┤\n │ Temporaries                  │  t1, t2… from expression evaluation\n └──────────────────────────────┘"
+  },
+  "04-unit-4#4": {
+    "file": "04-unit-4.md",
+    "slug": "04-unit-4",
+    "n": 4,
+    "startLine": 94,
+    "raw": " CALLER                                   CALLEE\n 1. evaluate actual parameters            4. save registers & status\n 2. store return address, old top_sp      5. initialize local data\n 3. jump to callee                        6. begin execution\n                     ── on return ──\n 9. caller uses return value              7. place return value\n                                          8. restore top_sp & registers, jump to return address"
+  },
+  "04-unit-4#5": {
+    "file": "04-unit-4.md",
+    "slug": "04-unit-4",
+    "n": 5,
+    "startLine": 108,
+    "raw": " fact(3) → fact(2) → fact(1)\n\n Activation tree:           Stack at deepest point:\n      main                  ┌──────────────┐\n        │                   │ main         │\n     fact(3)                ├──────────────┤\n        │                   │ fact(3) n=3  │\n     fact(2)                ├──────────────┤\n        │                   │ fact(2) n=2  │\n     fact(1)                ├──────────────┤\n                            │ fact(1) n=1  │ ← top\n                            └──────────────┘\n Returns: fact(1)=1 → fact(2)=2 → fact(3)=6"
+  },
+  "04-unit-4#6": {
+    "file": "04-unit-4.md",
+    "slug": "04-unit-4",
+    "n": 6,
+    "startLine": 180,
+    "raw": " global table ◄── main's table ◄── block's table   (search starts here →)"
+  },
+  "04-unit-4#7": {
+    "file": "04-unit-4.md",
+    "slug": "04-unit-4",
+    "n": 7,
+    "startLine": 249,
+    "raw": " 1) prod = 0                ← leader (first)\n 2) i = 1\n 3) t1 = 4 * i              ← leader (target of 10)\n 4) t2 = a[t1]\n 5) t3 = 4 * i\n 6) t4 = b[t3]\n 7) t5 = t2 * t4\n 8) prod = prod + t5\n 9) i = i + 1\n10) if i <= 20 goto (3)\n\n   ┌───────────┐\n   │ B1: 1–2   │\n   └─────┬─────┘\n         ▼\n   ┌───────────┐◄──┐\n   │ B2: 3–10  │───┘ (loop back)\n   └─────┬─────┘\n         ▼\n        EXIT"
+  },
+  "04-unit-4#8": {
+    "file": "04-unit-4.md",
+    "slug": "04-unit-4",
+    "n": 8,
+    "startLine": 274,
+    "raw": " 1) i = 1                   ← leader\n 2) j = 1                   ← leader (target of 11)\n 3) t1 = 10 * i             ← leader (target of 9)\n 4) t2 = t1 + j\n 5) t3 = 8 * t2\n 6) t4 = t3 - 88\n 7) a[t4] = 0.0\n 8) j = j + 1\n 9) if j <= 10 goto (3)\n10) i = i + 1               ← leader (after a jump)\n11) if i <= 10 goto (2)\n12) i = 1                   ← leader (after a jump)\n13) t5 = i - 1              ← leader (target of 17)\n14) t6 = 88 * t5\n15) a[t6] = 1.0\n16) i = i + 1\n17) if i <= 10 goto (13)"
+  },
+  "04-unit-4#9": {
+    "file": "04-unit-4.md",
+    "slug": "04-unit-4",
+    "n": 9,
+    "startLine": 354,
+    "raw": " (a - b) + e * (c + d)\n\n              + [3]\n            /       \\\n        − [2]        * [2]\n        /   \\       /    \\\n     a[1]  b[1]  e[1]   + [2]\n                        /   \\\n                     c[1]   d[1]"
+  },
+  "04-unit-4#10": {
+    "file": "04-unit-4.md",
+    "slug": "04-unit-4",
+    "n": 10,
+    "startLine": 371,
+    "raw": " cost[node][i] = min over all instructions that match this node of\n                 ( instruction cost + cost of evaluating the children in the best order with the available registers )"
+  },
+  "04-unit-4#11": {
+    "file": "04-unit-4.md",
+    "slug": "04-unit-4",
+    "n": 11,
+    "startLine": 383,
+    "raw": " memory plan (static | stack | heap) + activation records + parameter passing + symbol table\n    ──► basic blocks + flow graph ──► code generator (getReg + descriptors) ──► target code"
+  },
+  "05-unit-5#1": {
+    "file": "05-unit-5.md",
+    "slug": "05-unit-5",
+    "n": 1,
+    "startLine": 33,
+    "raw": " t1 = 4 * i                     t1 = 4 * i\n t2 = a[t1]           ⇒         t2 = a[t1]\n t3 = 4 * i                     t4 = b[t1]\n t4 = b[t3]"
+  },
+  "05-unit-5#2": {
+    "file": "05-unit-5.md",
+    "slug": "05-unit-5",
+    "n": 2,
+    "startLine": 43,
+    "raw": " x = y                ⇒         x = y          (now possibly dead)\n z = x + 1                      z = y + 1"
+  },
+  "05-unit-5#3": {
+    "file": "05-unit-5.md",
+    "slug": "05-unit-5",
+    "n": 3,
+    "startLine": 51,
+    "raw": " debug = false                  debug = false\n if (debug) print(x)  ⇒         (removed: condition is always false)"
+  },
+  "05-unit-5#4": {
+    "file": "05-unit-5.md",
+    "slug": "05-unit-5",
+    "n": 4,
+    "startLine": 59,
+    "raw": " area = 3.14 * 2 * 2  ⇒         area = 12.56\n n = 10; m = n * 2    ⇒         n = 10; m = 20       (propagation, then folding)"
+  },
+  "05-unit-5#5": {
+    "file": "05-unit-5.md",
+    "slug": "05-unit-5",
+    "n": 5,
+    "startLine": 67,
+    "raw": " while (i < n) {                x = y + z;\n     x = y + z;       ⇒         while (i < n) {\n     a[i] = x * i;                  a[i] = x * i;\n     i++;                           i++;\n }                              }"
+  },
+  "05-unit-5#6": {
+    "file": "05-unit-5.md",
+    "slug": "05-unit-5",
+    "n": 6,
+    "startLine": 81,
+    "raw": " BEFORE                               AFTER\n B1: prod = 0                         B1: prod = 0\n     i = 1                                t1 = 4\n B2: t1 = 4 * i                       B2: t2 = a[t1]\n     t2 = a[t1]                           t4 = b[t1]\n     t3 = 4 * i      ← CSE (= t1)         t5 = t2 * t4\n     t4 = b[t3]                           prod = prod + t5\n     t5 = t2 * t4                         t1 = t1 + 4      ← strength reduction\n     prod = prod + t5                     if t1 <= 80 goto B2  ← i eliminated\n     i = i + 1\n     if i <= 20 goto B2\n 8 instructions in the loop       →   6 instructions, no multiplication"
+  },
+  "05-unit-5#7": {
+    "file": "05-unit-5.md",
+    "slug": "05-unit-5",
+    "n": 7,
+    "startLine": 141,
+    "raw": " a = b + c\n b = a - d\n c = b + c\n d = a - d       ← same as b's computation (a - d0)!\n\n  Nodes:  n1 = (+ b0 c0)  labels: a\n          n2 = (− n1 d0)  labels: b, d    ← d attached to the existing node\n          n3 = (+ n2 c0)  labels: c\n\n               n3 (+) [c]\n              /         \\\n       n2 (−) [b, d]     c0      (c0 is the SAME leaf as below;\n         /       \\                drawn twice only for space)\n   n1 (+) [a]     d0\n     /     \\\n   b0       c0\n\n Optimized (if b is not live at exit):    If b is live at exit, add:\n   a = b + c                                b = d\n   d = a - d\n   c = d + c"
+  },
+  "05-unit-5#8": {
+    "file": "05-unit-5.md",
+    "slug": "05-unit-5",
+    "n": 8,
+    "startLine": 188,
+    "raw": " OUT[B] = GEN[B] ∪ ( IN[B] − KILL[B] )\n IN[B]  = ∪ OUT[P]   over all predecessors P of B"
+  },
+  "05-unit-5#9": {
+    "file": "05-unit-5.md",
+    "slug": "05-unit-5",
+    "n": 9,
+    "startLine": 202,
+    "raw": " Edges: ENTRY→B1, B1→B2, B2→B3, B2→B4, B3→B4, B4→B2 (loop), B4→EXIT\n\n B1: d1: i = m - 1   d2: j = n   d3: a = u1\n B2: d4: i = i + 1   d5: j = j - 1\n B3: d6: a = u2\n B4: d7: i = u3"
+  },
+  "05-unit-5#10": {
+    "file": "05-unit-5.md",
+    "slug": "05-unit-5",
+    "n": 10,
+    "startLine": 232,
+    "raw": " IN[B]  = USE[B] ∪ ( OUT[B] − DEF[B] )\n OUT[B] = ∪ IN[S]   over all successors S of B"
+  },
+  "05-unit-5#11": {
+    "file": "05-unit-5.md",
+    "slug": "05-unit-5",
+    "n": 11,
+    "startLine": 268,
+    "raw": " local (block, DAG) ──► global (flow graph + data-flow equations) ──► loops (motion, strength, IV)\n ──► peephole on target code"
+  }
+}

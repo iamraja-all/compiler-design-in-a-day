@@ -88,7 +88,11 @@ export default async function UnitPage({
               </span>
             </div>
 
-            <MarkdownRenderer content={section.content} />
+            <MarkdownRenderer
+              content={section.content}
+              fileSlug={unit.slug}
+              startTextIndex={section.textBlockOffset}
+            />
 
             <SectionDoneCheck sectionId={section.id} sectionTitle={section.title} />
           </section>

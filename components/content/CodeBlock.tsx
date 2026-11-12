@@ -10,6 +10,7 @@ interface CodeBlockProps {
 
 export function CodeBlock({ language, value }: CodeBlockProps) {
   const [copied, setCopied] = useState(false);
+  const isText = !language || language.toLowerCase() === 'text';
 
   const handleCopy = async () => {
     try {
@@ -49,7 +50,26 @@ export function CodeBlock({ language, value }: CodeBlockProps) {
 
       {/* Code Body */}
       <div className="p-4 overflow-x-auto">
-        <pre className="font-mono text-[0.92rem] leading-relaxed text-[var(--text)] whitespace-pre m-0">
+        <pre
+          className={`m-0 text-[0.92rem] text-[var(--text)] ${
+            isText ? 'whitespace-pre' : 'leading-relaxed whitespace-pre font-mono'
+          }`}
+          style={
+            isText
+              ? {
+                  fontFamily: 'var(--font-mono), "DejaVu Sans Mono", "Menlo", "Consolas", monospace',
+                  fontVariantLigatures: 'none',
+                  fontFeatureSettings: '"liga" 0, "calt" 0',
+                  lineHeight: 1.25,
+                  letterSpacing: 0,
+                  whiteSpace: 'pre',
+                  tabSize: 4,
+                }
+              : {
+                  lineHeight: 1.6,
+                }
+          }
+        >
           <code>{value}</code>
         </pre>
       </div>
